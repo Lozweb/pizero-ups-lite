@@ -10,7 +10,7 @@ ADDRESS = 0x36
 
 def readVoltage(bus):
     try:
-        read = bus.read_word_data(ADDRESS, 2)
+        read = bus.read_word_data(ADDRESS, 1)
         logging.info("voltage read: " + str(read))
         swapped = struct.unpack("<H", struct.pack(">H", read))[0]
         logging.info("voltage swapped: " + str(swapped))
@@ -23,7 +23,7 @@ def readVoltage(bus):
 
 def readCapacity(bus):
     try:
-        read = bus.read_word_data(ADDRESS, 2)
+        read = bus.read_word_data(ADDRESS, 3)
         logging.info("capacity read: " + str(read))
         swapped = struct.unpack("<H", struct.pack(">H", read))[0]
         logging.info("capacity swapped: " + str(swapped))

@@ -2,27 +2,33 @@ import smbus
 import struct
 import time
 
+ADRESSE = 0X32
+
 def read_voltage(bus):
-    address = 0x36
+    address = ADRESSE
     read = bus.read_word_data(address, 0X02)
     swapped = struct.unpack("<H", struct.pack(">H", read))[0]
     voltage = swapped * 1.25 / 1000 / 16
     return voltage
 
+
 def read_capacity(bus):
-    address = 0x36
+    address = ADRESSE
     read = bus.read_word_data(address, 0X04)
     swapped = struct.unpack("<H", struct.pack(">H", read))[0]
     capacity = swapped / 256
     return capacity
 
+
 def quick_start(bus):
-    address = 0x36
+    address = ADRESSE
     bus.write_word_data(address, 0x06, 0x4000)
 
+
 def power_on_reset(bus):
-    address = 0x36
+    address = ADRESSE
     bus.write_word_data(address, 0xfe, 0x0054)
+
 
 bus = smbus.SMBus(1)
 power_on_reset(bus)

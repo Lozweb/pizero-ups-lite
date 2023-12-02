@@ -45,7 +45,7 @@ def PowerOnReset(bus):
 
 
 bus = smbus.SMBus(1)
-PowerOnReset(bus)
+# PowerOnReset(bus)
 QuickStart(bus)
 
 print("Voltage: %5.2fV" % readVoltage(bus))

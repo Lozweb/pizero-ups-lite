@@ -1,47 +1,25 @@
 import struct
 import time
-import RPi.GPIO as GPIO
 import smbus
 
-GPIO.setmode(GPIO.BCM)
-GPIO.setwarnings(False)
-GPIO.setup(4, GPIO.IN)
 
-bus = smbus.SMBus(1)
-
-print(" ")
-
-
-def readVoltage(bus):
+def readVoltage(smbus_value):
     address = 0x36
-    read = bus.read_word_data(address, 0X02)
+    read = smbus_value.read_word_data(address, 0X02)
     swapped = struct.unpack("<H", struct.pack(">H", read))[0]
     voltage = swapped * 1.25 / 1000 / 16
     return voltage
 
 
-def readCapacity(bus):
+def readCapacity(smbus_value):
     address = 0x36
-    read = bus.read_word_data(address, 0X04)
+    read = smbus_value.read_word_data(address, 0X04)
     swapped = struct.unpack("<H", struct.pack(">H", read))[0]
     capacity = swapped / 256
     return capacity
 
 
-def QuickStart(bus):
-    address = 0x36
-    bus.write_word_data(address, 0x06, 0x4000)
-
-
-def PowerOnReset(bus):
-    address = 0x36
-    bus.write_word_data(address, 0xfe, 0x0054)
-
-
-PowerOnReset(bus)
-QuickStart(bus)
-
-print("Initialize the MAX17040 ......")
+bus = smbus.SMBus(1)
 
 while True:
     print("++++++++++++++++++++")
@@ -51,12 +29,5 @@ while True:
         print("Battery FULL")
     if readCapacity(bus) < 5:
         print("Battery LOW")
-
-    if GPIO.input(4) == GPIO.HIGH:
-        print("Power Adapter Plug In ")
-
-    if GPIO.input(4) == GPIO.LOW:
-        print("Power Adapter Unplug")
-
     print("++++++++++++++++++++")
     time.sleep(2)

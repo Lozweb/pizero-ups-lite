@@ -1,56 +1,52 @@
 import smbus
 import struct
 import time
+import logging
 
-ADRESSE = 0X32
+logging.basicConfig(level=logging.DEBUG)
 
-def read_voltage(bus):
-    address = ADRESSE
-    read = bus.read_word_data(address, 0X02)
-    swapped = struct.unpack("<H", struct.pack(">H", read))[0]
-    voltage = swapped * 1.25 / 1000 / 16
-    return voltage
+ADDRESS = 0x36
 
 
-def read_capacity(bus):
-    address = ADRESSE
-    read = bus.read_word_data(address, 0X04)
-    swapped = struct.unpack("<H", struct.pack(">H", read))[0]
-    capacity = swapped / 256
-    return capacity
+def readVoltage(bus):
+    try:
+        read = bus.read_word_data(ADDRESS, 2)
+        logging.info("voltage read: " + str(read))
+        swapped = struct.unpack("<H", struct.pack(">H", read))[0]
+        logging.info("voltage swapped: " + str(swapped))
+        voltage = swapped * 1.25 / 1000 / 16
+        logging.info("voltage return: " + str(voltage))
+        return voltage
+    except:
+        return 0.0
 
 
-def quick_start(bus):
-    address = ADRESSE
+def readCapacity(bus):
+    try:
+        read = bus.read_word_data(ADDRESS, 4)
+        logging.info("capacity read: " + str(read))
+        swapped = struct.unpack("<H", struct.pack(">H", read))[0]
+        logging.info("capacity swapped: " + str(swapped))
+        capacity = swapped / 256
+        logging.info("capacity return: " + str(capacity))
+        return capacity
+    except:
+        return 0.0
+
+
+def QuickStart(bus):
+    address = 0x36
     bus.write_word_data(address, 0x06, 0x4000)
 
 
-def power_on_reset(bus):
-    address = ADRESSE
+def PowerOnReset(bus):
+    address = 0x36
     bus.write_word_data(address, 0xfe, 0x0054)
 
 
 bus = smbus.SMBus(1)
-power_on_reset(bus)
-quick_start(bus)
-previous_voltage = read_voltage(bus)
+PowerOnReset(bus)
+QuickStart(bus)
 
-while True:
-    print("++++++++++++++++++++")
-    current_voltage = read_voltage(bus)
-    print("Battery:%4i%% %5.2fV" % (read_capacity(bus), current_voltage))
-    if current_voltage > previous_voltage:
-        print("     Charging")
-    elif current_voltage < previous_voltage:
-        print("    Discharging")
-    previous_voltage = current_voltage
-    capacity = read_capacity(bus)
-    if capacity >= 100:
-        print("----Battery FULL----")
-    elif capacity <= 15 and capacity > 5:
-        print("----Battery LOW-----")
-    elif capacity <= 5:
-        print("  D A N G E R !!!")
-        print("BATTERY RUNNING OUT")
-    print("++++++++++++++++++++")
-    time.sleep(5)
+print("Voltage: %5.2fV" % readVoltage(bus))
+print("Capacity: %5i%%" % readCapacity(bus))
